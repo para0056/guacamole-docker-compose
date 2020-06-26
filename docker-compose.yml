@@ -1,16 +1,4 @@
 ####################################################################################
-# docker-compose file for Apache Guacamole
-# created by PCFreak 2017-06-28
-#
-# Apache Guacamole is a clientless remote desktop gateway. It supports standard
-# protocols like VNC, RDP, and SSH. We call it clientless because no plugins or
-# client software are required. Thanks to HTML5, once Guacamole is installed on
-# a server, all you need to access your desktops is a web browser.
-####################################################################################
-#
-# What does this file do?
-#
-# Using docker-compose it will:
 #
 # - create a network 'guacnetwork_compose' with the 'bridge' driver.
 # - create a service 'guacd_compose' from 'guacamole/guacd' connected to 'guacnetwork'
@@ -21,12 +9,9 @@
 # (1)
 #  DB-Init script is in './init/initdb.sql' it has been created executing
 #  'docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --postgres > ./init/initdb.sql'
-#  once.
-#  DATA-DIR       is in './data'
-#  If you want to change the DB password change all lines with 'POSTGRES_PASSWORD:' and
-#  change it to your needs before first start.
+#  DATA-DIR is in './data'
+#  To change the DB password, change all lines with 'POSTGRES_PASSWORD:'
 #  To start from scratch delete './data' dir completely
-#  './data' will hold all data after first start!
 #  The initdb.d scripts are only executed the first time the container is started
 #  (and the database files are empty). If the database files already exist then the initdb.d
 #  scripts are ignored (e.g. when you mount a local directory or when docker-compose saves
@@ -71,15 +56,6 @@
 #     Password: guacadmin
 #
 # Make sure you change it immediately!
-#
-# version            date              comment
-# 0.1                2017-06-28        initial release
-# 0.2                2017-10-09        minor fixes + internal GIT push
-# 0.3                2017-10-09        minor fixes + public GIT push
-# 0.4                2019-08-14        creating of ssl certs now in prepare.sh
-#                                      simplified nginx startup commands
-####################################################################################
-
 version: '2.0'
 
 # networks
@@ -92,7 +68,7 @@ networks:
 services:
   # guacd
   guacd:
-    container_name: guacd_compose
+    container_name: guacd
     image: guacamole/guacd
     networks:
       guacnetwork_compose:
@@ -102,11 +78,11 @@ services:
     - ./record:/record:rw
   # postgres
   postgres:
-    container_name: postgres_guacamole_compose
+    container_name: postgres
     environment:
       PGDATA: /var/lib/postgresql/data/guacamole
       POSTGRES_DB: guacamole_db
-      POSTGRES_PASSWORD: ChooseYourOwnPasswordHere1234
+      POSTGRES_PASSWORD: Changeme1
       POSTGRES_USER: guacamole_user
     image: postgres
     networks:
@@ -118,7 +94,7 @@ services:
 
   # guacamole
   guacamole:
-    container_name: guacamole_compose
+    container_name: guacamole
     depends_on:
     - guacd
     - postgres
@@ -126,7 +102,7 @@ services:
       GUACD_HOSTNAME: guacd
       POSTGRES_DATABASE: guacamole_db
       POSTGRES_HOSTNAME: postgres
-      POSTGRES_PASSWORD: ChooseYourOwnPasswordHere1234
+      POSTGRES_PASSWORD: Changeme1
       POSTGRES_USER: guacamole_user
     image: guacamole/guacamole
     links:
@@ -143,7 +119,7 @@ services:
 ########### optional ##############
   # nginx
   nginx:
-   container_name: nginx_guacamole_compose
+   container_name: nginx
    restart: always
    image: nginx
    volumes:
